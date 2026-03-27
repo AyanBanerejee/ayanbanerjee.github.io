@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ayan Banerjee — Game Developer & XR Specialist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0f;
+    --bg2: #0f0f18;
+    --surface: #13131e;
+    --border: rgba(255,255,255,0.07);
+    --accent: #7DF9AA;
+    --accent2: #4DBBFF;
+    --accent3: #FF6B6B;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* ── CURSOR DOT ── */
+  .cursor {
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s;
+    mix-blend-mode: screen;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(10,10,15,0.95), transparent);
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--accent);
+    text-decoration: none;
+    letter-spacing: -0.5px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  /* ── HERO ── */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 60px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 700px; height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(125,249,170,0.08) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-glow2 {
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(77,187,255,0.06) 0%, transparent 70%);
+    top: 20%; right: 5%;
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(125,249,170,0.08);
+    border: 1px solid rgba(125,249,170,0.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.2s forwards;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .hero-name {
+    font-family: var(--font-head);
+    font-size: clamp(52px, 8vw, 96px);
+    font-weight: 800;
+    line-height: 0.95;
+    letter-spacing: -3px;
+    color: var(--text);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.35s forwards;
+  }
+
+  .hero-name span {
+    color: transparent;
+    -webkit-text-stroke: 1.5px rgba(255,255,255,0.25);
+  }
+
+  .hero-title {
+    font-family: var(--font-head);
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.45s forwards;
+  }
+
+  .hero-desc {
+    max-width: 560px;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 48px;
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.55s forwards;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.65s forwards;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #0a0a0f;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 30px rgba(125,249,170,0.25);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 40px rgba(125,249,170,0.35);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--text);
+    padding: 14px 28px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.04);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    margin-top: 80px;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+    opacity: 0;
+    animation: fadeUp 0.7s ease 0.8s forwards;
+  }
+
+  .stat-num {
+    font-family: var(--font-head);
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .stat-num span { color: var(--accent); }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: 100px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    height: 1px;
+    width: 40px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  .section-title {
+    font-family: var(--font-head);
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.05;
+    margin-bottom: 60px;
+    color: var(--text);
+  }
+
+  /* ── SKILLS ── */
+  #skills { background: var(--bg2); border-radius: 24px; max-width: 100%; }
+
+  .skills-wrapper { max-width: 1200px; margin: 0 auto; padding: 100px 60px; }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .skill-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: border-color 0.3s, transform 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skill-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(125,249,170,0.04), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .skill-card:hover { border-color: rgba(125,249,170,0.2); transform: translateY(-4px); }
+  .skill-card:hover::before { opacity: 1; }
+
+  .skill-icon { font-size: 28px; margin-bottom: 12px; }
+
+  .skill-category {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .skill-name {
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .skill-level {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  /* ── EXPERIENCE ── */
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--accent), transparent);
+    opacity: 0.3;
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 52px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -38px; top: 8px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px rgba(125,249,170,0.5);
+  }
+
+  .timeline-period {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .timeline-role {
+    font-family: var(--font-head);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.5px;
+    margin-bottom: 2px;
+  }
+
+  .timeline-company {
+    font-size: 14px;
+    color: var(--accent2);
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+
+  .timeline-bullets {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .timeline-bullets li {
+    display: flex;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .timeline-bullets li::before {
+    content: '→';
+    color: var(--accent);
+    font-size: 12px;
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+
+  /* ── PROJECTS ── */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+
+  .project-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    transition: border-color 0.3s, transform 0.3s;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+  }
+
+  .project-card::after {
+    content: '↗';
+    position: absolute;
+    top: 24px; right: 24px;
+    font-size: 18px;
+    color: var(--muted);
+    transition: color 0.2s, transform 0.2s;
+  }
+
+  .project-card:hover {
+    border-color: rgba(77,187,255,0.25);
+    transform: translateY(-6px);
+  }
+
+  .project-card:hover::after { color: var(--accent2); transform: translate(2px, -2px); }
+
+  .project-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+  }
+
+  .tag-game { background: rgba(125,249,170,0.1); color: var(--accent); border: 1px solid rgba(125,249,170,0.2); }
+  .tag-xr { background: rgba(77,187,255,0.1); color: var(--accent2); border: 1px solid rgba(77,187,255,0.2); }
+  .tag-web { background: rgba(255,107,107,0.1); color: var(--accent3); border: 1px solid rgba(255,107,107,0.2); }
+
+  .project-title {
+    font-family: var(--font-head);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    letter-spacing: -0.3px;
+    padding-right: 32px;
+  }
+
+  .project-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 20px;
+    font-weight: 300;
+  }
+
+  .project-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .tech-pill {
+    font-size: 11px;
+    padding: 3px 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* ── PUBLICATIONS ── */
+  .pub-list { display: flex; flex-direction: column; gap: 20px; }
+
+  .pub-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    display: flex;
+    gap: 20px;
+  }
+
+  .pub-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 52px; height: 52px;
+    background: rgba(125,249,170,0.08);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pub-title {
+    font-family: var(--font-head);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+    letter-spacing: -0.2px;
+  }
+
+  .pub-meta {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ── CONTACT ── */
+  #contact-wrap {
+    background: var(--bg2);
+    border-radius: 24px;
+    margin: 0 0 80px;
+  }
+
+  .contact-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 100px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+
+  .contact-title {
+    font-family: var(--font-head);
+    font-size: clamp(36px, 5vw, 56px);
+    font-weight: 800;
+    letter-spacing: -2px;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  .contact-title span { color: var(--accent); }
+
+  .contact-sub {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+    line-height: 1.8;
+  }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    transition: border-color 0.2s, transform 0.2s;
+    font-weight: 400;
+    font-size: 14px;
+  }
+
+  .contact-link:hover { border-color: rgba(125,249,170,0.2); transform: translateX(4px); }
+
+  .contact-link-icon {
+    width: 36px; height: 36px;
+    background: rgba(125,249,170,0.08);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .contact-link-label { font-size: 11px; color: var(--muted); margin-bottom: 1px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+  .contact-link-value { color: var(--text); font-size: 14px; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  footer span { color: var(--accent); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(125,249,170,0.2); border-radius: 3px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    #hero { padding: 100px 24px 60px; }
+    section { padding: 60px 24px; }
+    .skills-wrapper { padding: 60px 24px; }
+    .contact-inner { grid-template-columns: 1fr; gap: 40px; padding: 60px 24px; }
+    .hero-stats { gap: 28px; flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">AB.</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div id="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Available for opportunities</div>
+    <h1 class="hero-name">Ayan<br><span>Banerjee</span></h1>
+    <div class="hero-title">Technical Team Lead · Unity & Three.js · AR / VR</div>
+    <p class="hero-desc">
+      Passionate game developer with 9+ years building immersive 3D experiences — from hyper-casual mobile hits to enterprise AR/VR systems. Published on App Store & Google Play. Based in Kolkata, India.
+    </p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn-primary">View My Work ↓</a>
+      <a href="mailto:ayanbanerjee777@gmail.com" class="btn-secondary">Get In Touch →</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">9<span>+</span></div>
+        <div class="stat-label">Years Experience</div>
+      </div>
+      <div>
+        <div class="stat-num">100<span>K+</span></div>
+        <div class="stat-label">Game Downloads</div>
+      </div>
+      <div>
+        <div class="stat-num">5<span>+</span></div>
+        <div class="stat-label">Published Titles</div>
+      </div>
+      <div>
+        <div class="stat-num">2</div>
+        <div class="stat-label">Research Papers</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SKILLS -->
+<div id="skills">
+  <div class="skills-wrapper">
+    <div class="section-label">What I work with</div>
+    <h2 class="section-title">Technical Skills</h2>
+    <div class="skills-grid">
+      <div class="skill-card">
+        <div class="skill-icon">🎮</div>
+        <div class="skill-category">Game Engine</div>
+        <div class="skill-name">Unity</div>
+        <div class="skill-level">Expert · 9+ years</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🌐</div>
+        <div class="skill-category">Web & 3D</div>
+        <div class="skill-name">Three.js / WebGL</div>
+        <div class="skill-level">Expert</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🥽</div>
+        <div class="skill-category">Extended Reality</div>
+        <div class="skill-name">AR Foundation</div>
+        <div class="skill-level">Advanced</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🎯</div>
+        <div class="skill-category">VR Platform</div>
+        <div class="skill-name">Oculus Quest 2</div>
+        <div class="skill-level">Advanced</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🚀</div>
+        <div class="skill-category">Game Engine</div>
+        <div class="skill-name">Unreal Engine</div>
+        <div class="skill-level">Intermediate</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">💻</div>
+        <div class="skill-category">Primary Language</div>
+        <div class="skill-name">C# / JavaScript</div>
+        <div class="skill-level">Expert</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">⚡</div>
+        <div class="skill-category">Specialisation</div>
+        <div class="skill-name">Multiplayer Networking</div>
+        <div class="skill-level">Advanced</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">📊</div>
+        <div class="skill-category">Specialisation</div>
+        <div class="skill-name">Performance Optimisation</div>
+        <div class="skill-level">Advanced</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🤖</div>
+        <div class="skill-category">Specialisation</div>
+        <div class="skill-name">AI & Physics Simulations</div>
+        <div class="skill-level">Advanced</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">💰</div>
+        <div class="skill-category">Business</div>
+        <div class="skill-name">Game Monetization</div>
+        <div class="skill-level">Advanced</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🗂️</div>
+        <div class="skill-category">Tools</div>
+        <div class="skill-name">Git / Version Control</div>
+        <div class="skill-level">Advanced</div>
+      </div>
+      <div class="skill-card">
+        <div class="skill-icon">🎨</div>
+        <div class="skill-category">Tools</div>
+        <div class="skill-name">Blender / Photoshop</div>
+        <div class="skill-level">Basic</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-label">Career journey</div>
+  <h2 class="section-title">Experience</h2>
+  <div class="timeline">
+
+    <div class="timeline-item">
+      <div class="timeline-period">Apr 2024 — Present</div>
+      <div class="timeline-role">Technical Team Lead</div>
+      <div class="timeline-company">FixedTec Pvt Ltd</div>
+      <ul class="timeline-bullets">
+        <li>Building AR-based automotive diagnostic tools integrated with vehicle dongles and ECUs for real-time data visualisation.</li>
+        <li>Led end-to-end development from concept through deployment, managing scope, timelines, and quality gates.</li>
+        <li>Managed cross-functional teams, setting sprint plans and optimising workflows for on-time delivery.</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-period">Sep 2020 — Apr 2024</div>
+      <div class="timeline-role">Technical Team Lead</div>
+      <div class="timeline-company">Mayabious Art LLP</div>
+      <ul class="timeline-bullets">
+        <li>Headed a team of developers building Unity-based games and VR/AR applications across multiple platforms.</li>
+        <li>Drove architecture decisions improving performance by 30%+ through render optimisations and asset pipelines.</li>
+        <li>Mentored junior developers, fostering best practices in version control, code reviews, and documentation.</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-period">Feb 2020 — Aug 2020</div>
+      <div class="timeline-role">Lead Game Developer</div>
+      <div class="timeline-company">Biswa Games Pvt Ltd</div>
+      <ul class="timeline-bullets">
+        <li>Directed design and development of hyper-casual titles, overseeing delivery from prototype to store submission.</li>
+        <li>Coached junior developers on Unity best practices, physics, and game monetisation strategies.</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-period">Jul 2019 — Dec 2019</div>
+      <div class="timeline-role">Lead Game Developer</div>
+      <div class="timeline-company">IPapps Technologies Pvt Ltd</div>
+      <ul class="timeline-bullets">
+        <li>Architected scalable game systems enabling rapid feature iteration with minimal technical debt.</li>
+        <li>Introduced Git-based version control workflows, significantly reducing merge conflicts and release risk.</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-period">Aug 2018 — Jun 2019</div>
+      <div class="timeline-role">Assistant Game Developer</div>
+      <div class="timeline-company">DigitalAptech Pvt Ltd</div>
+      <ul class="timeline-bullets">
+        <li>Designed and optimised game levels for Android & iOS, resolving performance bottlenecks to hit 60 fps targets.</li>
+        <li>Shipped ColorBump and TanksClash3D to Google Play with combined 100K+ downloads.</li>
+      </ul>
+    </div>
+
+    <div class="timeline-item">
+      <div class="timeline-period">Feb 2016 — Aug 2018</div>
+      <div class="timeline-role">Assistant Game Developer</div>
+      <div class="timeline-company">Mayabious Art LLP</div>
+      <ul class="timeline-bullets">
+        <li>Developed core game mechanics and 3D environments using Unity and C#.</li>
+        <li>Collaborated in Agile sprints, meeting milestones across multiple concurrent projects.</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-label">What I've built</div>
+  <h2 class="section-title">Key Projects</h2>
+  <div class="projects-grid">
+
+    <a href="https://ecoparknewtown.com/ecoparkvr/" target="_blank" class="project-card">
+      <span class="project-tag tag-web">360° Virtual Tour</span>
+      <div class="project-title">Ecopark New Town VR</div>
+      <p class="project-desc">Immersive virtual walkthrough of Ecopark New Town — viewed by thousands of prospective buyers and visitors using WebGL-powered panoramic rendering.</p>
+      <div class="project-tech">
+        <span class="tech-pill">Three.js</span>
+        <span class="tech-pill">WebGL</span>
+        <span class="tech-pill">KRPano</span>
+      </div>
+    </a>
+
+    <a href="https://theparksyde.com/vr/" target="_blank" class="project-card">
+      <span class="project-tag tag-web">360° Virtual Tour</span>
+      <div class="project-title">Parksyde VR</div>
+      <p class="project-desc">Interactive real estate virtual tour enabling buyers to explore property layouts and interiors from anywhere in the world.</p>
+      <div class="project-tech">
+        <span class="tech-pill">Three.js</span>
+        <span class="tech-pill">WebGL</span>
+        <span class="tech-pill">KRPano</span>
+      </div>
+    </a>
+
+    <a href="https://srijanrealty.com/360_virtual_tour/laguna-bay/" target="_blank" class="project-card">
+      <span class="project-tag tag-web">360° Virtual Tour</span>
+      <div class="project-title">Laguna Bay — Srijan Realty</div>
+      <p class="project-desc">Full 360° virtual tour for Srijan Realty's premium Laguna Bay development, featuring seamless room-to-room navigation and hotspot overlays.</p>
+      <div class="project-tech">
+        <span class="tech-pill">Three.js</span>
+        <span class="tech-pill">WebGL</span>
+        <span class="tech-pill">KRPano</span>
+      </div>
+    </a>
+
+    <a href="https://play.google.com/store/apps/details?id=com.digitalaptech.colorbump" target="_blank" class="project-card">
+      <span class="project-tag tag-game">Android Game</span>
+      <div class="project-title">Color Bump</div>
+      <p class="project-desc">Casual tap-to-match hyper-casual game published on Google Play with 100K+ combined downloads. Simple one-finger mechanic with addictive colour-matching gameplay.</p>
+      <div class="project-tech">
+        <span class="tech-pill">Unity</span>
+        <span class="tech-pill">C#</span>
+        <span class="tech-pill">Android</span>
+      </div>
+    </a>
+
+    <a href="https://play.google.com/store/apps/details?id=com.digitalaptech.tankclash" target="_blank" class="project-card">
+      <span class="project-tag tag-game">Multiplayer Game</span>
+      <div class="project-title">TanksClash3D</div>
+      <p class="project-desc">Real-time 3D multiplayer tank battle game for Android. Players engage in live PvP combat across dynamic 3D battlefields with intuitive mobile controls.</p>
+      <div class="project-tech">
+        <span class="tech-pill">Unity</span>
+        <span class="tech-pill">C#</span>
+        <span class="tech-pill">Multiplayer</span>
+        <span class="tech-pill">Android</span>
+      </div>
+    </a>
+
+    <a href="https://appadvice.com/app/tiger-trapper/1179662045" target="_blank" class="project-card">
+      <span class="project-tag tag-game">iOS Game</span>
+      <div class="project-title">Tiger Trapper</div>
+      <p class="project-desc">Digital revival of the classic ancient Indian strategy board game, published on the App Store. Deep strategic thinking wrapped in intuitive mobile-first controls.</p>
+      <div class="project-tech">
+        <span class="tech-pill">Unity</span>
+        <span class="tech-pill">C#</span>
+        <span class="tech-pill">iOS</span>
+        <span class="tech-pill">Strategy</span>
+      </div>
+    </a>
+
+    <a href="https://apps.apple.com/gb/app/boxing-promoter/id1225341210" target="_blank" class="project-card">
+      <span class="project-tag tag-game">iOS Game</span>
+      <div class="project-title">Boxing Promoter</div>
+      <p class="project-desc">Sports management simulation where the player takes the role of a boxing promoter — scouting fighters, arranging bouts, and building a global boxing empire.</p>
+      <div class="project-tech">
+        <span class="tech-pill">Unity</span>
+        <span class="tech-pill">C#</span>
+        <span class="tech-pill">iOS</span>
+        <span class="tech-pill">Simulation</span>
+      </div>
+    </a>
+
+    <a href="https://play.google.com/store/apps/details?id=com.creativefungames.smartcabby" target="_blank" class="project-card">
+      <span class="project-tag tag-game">Android Game</span>
+      <div class="project-title">SmartCabby 2019™</div>
+      <p class="project-desc">Casual 2D cab-driving game where players pick up and drop off passengers on time while following traffic rules. Published on Google Play.</p>
+      <div class="project-tech">
+        <span class="tech-pill">Unity</span>
+        <span class="tech-pill">C#</span>
+        <span class="tech-pill">Android</span>
+        <span class="tech-pill">2D</span>
+      </div>
+    </a>
+
+    <div class="project-card" style="cursor:default;">
+      <span class="project-tag tag-xr">AR / VR</span>
+      <div class="project-title">AR Automobile Diagnostics</div>
+      <p class="project-desc">Enterprise AR system for real-time vehicle diagnostics, integrating AR overlays with ECU/dongle data streams for automotive service technicians.</p>
+      <div class="project-tech">
+        <span class="tech-pill">Unity</span>
+        <span class="tech-pill">AR Foundation</span>
+        <span class="tech-pill">C#</span>
+        <span class="tech-pill">Enterprise</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PUBLICATIONS -->
+<section id="publications">
+  <div class="section-label">Research</div>
+  <h2 class="section-title">Publications</h2>
+  <div class="pub-list">
+    <div class="pub-card">
+      <div class="pub-icon">📄</div>
+      <div>
+        <div class="pub-title">Block-Based Data Encryption & Decryption using Algorithmic Operations</div>
+        <div class="pub-meta">CiiT International Journal of Networking & Communication Engineering · Feb 2015 · pp. 69–73 · Co-authored with Pranam Paul</div>
+      </div>
+    </div>
+    <div class="pub-card">
+      <div class="pub-icon">📄</div>
+      <div>
+        <div class="pub-title">Block-Based Data Encryption & Decryption using Number System Logic</div>
+        <div class="pub-meta">CiiT International Journal of Networking & Communication Engineering · May 2015 · Co-authored with Pranam Paul</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<div id="contact-wrap">
+  <div id="contact" class="contact-inner">
+    <div>
+      <div class="section-label">Let's talk</div>
+      <h2 class="contact-title">Open to<br><span>new projects</span></h2>
+      <p class="contact-sub">Whether you're building a game, an AR/VR experience, or an immersive web product — I'd love to hear about it. Let's create something memorable.</p>
+    </div>
+    <div class="contact-links">
+      <a href="mailto:ayanbanerjee777@gmail.com" class="contact-link">
+        <div class="contact-link-icon">✉️</div>
+        <div>
+          <div class="contact-link-label">Email</div>
+          <div class="contact-link-value">ayanbanerjee777@gmail.com</div>
+        </div>
+      </a>
+      <a href="https://linkedin.com/in/ayan-banerjee-b71508164" target="_blank" class="contact-link">
+        <div class="contact-link-icon">💼</div>
+        <div>
+          <div class="contact-link-label">LinkedIn</div>
+          <div class="contact-link-value">ayan-banerjee-b71508164</div>
+        </div>
+      </a>
+      <a href="tel:+919903218706" class="contact-link">
+        <div class="contact-link-icon">📞</div>
+        <div>
+          <div class="contact-link-label">Phone</div>
+          <div class="contact-link-value">+91 9903218706</div>
+        </div>
+      </a>
+      <div class="contact-link" style="cursor:default;">
+        <div class="contact-link-icon">📍</div>
+        <div>
+          <div class="contact-link-label">Location</div>
+          <div class="contact-link-value">Kolkata, India 700035</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  Built with ♥ by <span>Ayan Banerjee</span> · Technical Team Lead · Unity & XR Developer
+</footer>
+
+<script>
+  // Cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX - 4 + 'px';
+    cursor.style.top = e.clientY - 4 + 'px';
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.skill-card, .project-card, .timeline-item, .pub-card').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(24px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
